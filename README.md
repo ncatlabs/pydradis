@@ -25,6 +25,10 @@ Usage Example
 -
 This is a wrapper for the [Dradis Pro API](http://securityroots.com/dradispro/support/guides/rest_api/index.html)
 
+Install by either pulling from this repo or using:
+```
+pip install pydradis
+```
 Setup:
 
 ```python
