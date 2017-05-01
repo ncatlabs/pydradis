@@ -28,6 +28,7 @@
 import requests
 import string
 import json
+import shutil
 
 class Pydradis:
 
@@ -38,6 +39,7 @@ class Pydradis:
     issue_endpoint = "/pro/api/issues"
     evidence_endpoint = "/pro/api/nodes/<ID>/evidence"
     note_endpoint = "/pro/api/nodes/<ID>/notes" 
+    attachment_endpoint = "/pro/api/nodes/<ID>/attachments"
 
 
 
@@ -83,7 +85,7 @@ class Pydradis:
         return r.json();
 
     ####################################
-    #         Clients Endpoint         # <P>
+    #         Clients Endpoint         #
     ####################################
 
     #Get Client List 
@@ -210,7 +212,7 @@ class Pydradis:
 
 
     ####################################
-    #         Projects Endpoint        # <P>
+    #         Projects Endpoint        #
     ####################################
 
     #Get Project List 
@@ -343,7 +345,7 @@ class Pydradis:
 
 
     ####################################
-    #         Nodes Endpoint           # <P>
+    #         Nodes Endpoint           #
     ####################################
 
     #Get Node List 
@@ -503,7 +505,7 @@ class Pydradis:
 
 
     ####################################
-    #         Issues Endpoint          # <P>
+    #         Issues Endpoint          #
     ####################################
 
     #Get Issue List 
@@ -649,7 +651,7 @@ class Pydradis:
         return r;
 
     ####################################
-    #         Evidence Endpoint        # <?>
+    #         Evidence Endpoint        #
     ####################################
 
     #Get Evidence List 
@@ -792,7 +794,7 @@ class Pydradis:
 
 
     ####################################
-    #         Notes Endpoint           # <?>
+    #         Notes Endpoint           #
     ####################################
 
 
@@ -939,8 +941,117 @@ class Pydradis:
         return r;
 
 
+    ####################################
+    #       Attachments Endpoint       #
+    ####################################
 
+    #Get Attachments
+    def get_attachmentlist(self,pid,node_id):
+        #URL
+        url = self.__url+self.attachment_endpoint.replace("<ID>",str(node_id));
 
+        #HEADER
+        header = { 'Authorization' : 'Token token="'+self.__apiToken+'"','Dradis-Project-Id': str(pid)}
+
+        #CONTACT DRADIS
+        r = self.contactDradis(url,header,"GET","200")
+
+        #RETURN
+        if (r == None):
+            return None;
+
+        result = [];
+        for i in range(0,len(r)):
+            result += [[r[i]["filename"],r[i]["link"]]]
+
+        return result;
+
+    #Get (Download) Attachment
+    def get_attachment(self,pid,node_id,attachment_name,output_file=None):
+        #URL
+        url = self.__url+self.attachment_endpoint.replace("<ID>",str(node_id))+"/"+attachment_name;
+
+        #HEADER
+        header = { 'Authorization' : 'Token token="'+self.__apiToken+'"','Dradis-Project-Id': str(pid)}
+
+        #CONTACT DRADIS
+        r = self.contactDradis(url,header,"GET","200")
+
+        try:
+            download = r["link"];
+
+            response = requests.get(self.__url+download,stream=True,headers=header,verify=self.__verify)
+            if (output_file is None):
+                output_file = r["filename"]
+
+            with open(output_file,"wb") as out_file:
+                shutil.copyfileobj(response.raw,out_file)
+            del response
+        except:
+            return None;
+
+        return True;
+
+    #Post Attachment
+    def post_attachment(self,pid,node_id,attachment_filename):
+        #URL
+        url = self.__url+self.attachment_endpoint.replace("<ID>",str(node_id));
+
+        #HEADER
+        header = { 'Authorization' : 'Token token="'+self.__apiToken+'"','Dradis-Project-Id': str(pid)}
+
+        try:
+
+            #FILES
+            files = [('files[]',open(attachment_filename, 'rb'))]
+            
+            r = requests.post(url,headers=header,files=files,verify=self.__verify);
+            if(r.status_code != 201):
+                return None;
+            else:
+                r = r.json()
+                return [r[0]["filename"],r[0]["link"]];
+        except:
+            return None;
+
+        return True;
+
+    #Rename Attachment
+    def rename_attachment(self,pid,node_id,attachment_name,new_attachment_name):
+        #URL
+        url = self.__url+self.attachment_endpoint.replace("<ID>",str(node_id))+"/"+attachment_name;
+
+        #HEADER
+        header = { 'Authorization' : 'Token token="'+self.__apiToken+'"', 'Content-type': 'application/json','Dradis-Project-Id': str(pid)}
+        
+        #DATA
+        data = {"attachment":{"filename":new_attachment_name}}
+
+        #CONTACT DRADIS
+        r = self.contactDradis(url,header,"PUT","200",json.dumps(data))
+        
+        #RETURN
+        if (r == None):
+            return None;
+
+        return [r['filename'],r["link"]];
+
+    #Delete Attachment
+    def delete_attachment(self,pid,node_id,attachment_name):
+        #URL
+        url = self.__url+self.attachment_endpoint.replace("<ID>",str(node_id))+"/"+attachment_name;
+
+        #HEADER
+        header = { 'Authorization' : 'Token token="'+self.__apiToken+'"','Dradis-Project-Id': str(pid), 'Content-type': 'application/json'}
+
+        #CONTACT DRADIS
+        r = self.contactDradis(url,header,"DELETE","200");
+
+        #RETURN
+        if (r == None):
+            return None;
+
+        return True;
 
 
 

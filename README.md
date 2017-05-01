@@ -288,4 +288,36 @@ pd.get_note(1,1,1)
 True
 ```
 
+<h4>Attachment Endpoint</h4>
+
+- get_attachmentlist(int project_id, int node_id)
+```python
+>>> pd.get_attachmentlist(1,358)
+[[u'screenshot.png', u'/pro/nodes/358/attachments/screenshot.png'], [u'test.py', u'/pro/nodes/358/attachments/test.py']]
+```
+
+- get_attachment(int projectid, int nodeid, string attachment_name, string output_name=None)
+```python
+>>> pd.get_attachment(1,358,"screenshot.png","downloads/screenshot01.png")
+True #This means it succesfully downloaded file to downloads/screenshot01.png
+```
+
+- pd.post_attachment(int projectid, int nodeid, string attachment_filename)
+```python
+>>> pd.post_attachment(1,358,"important.txt")
+[u'important.txt', u'/pro/nodes/358/attachments/important.txt']
+```
+
+- pd.rename_attachment(int projectid, int nodeid, string attachment_name, string new_attachment_name)
+```python
+>>> pd.rename_attachment(1,358,"important.txt","super_important.txt")
+[u'super_important.txt', u'/pro/nodes/358/attachments/super_important.txt']
+```
+
+- pd.delete_attachment(int projectid, int nodeid, string attachment_name)
+```python
+>>> pd.delete_attachment(1,358,"important.txt")
+True
+```
+
 

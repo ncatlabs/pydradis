@@ -213,11 +213,37 @@ if __name__ == "__main__":
     else: print("FAILED")
 
 
+    #Attachments
+    print ("\n<ATTACHMENT ENDPOINT>")
+
+    print ("--Get Attachments List"),
+    if (pd.get_attachmentlist(projectid,nodeid) != None): print("PASS")
+    else: print("FAILED") 
+
+    print("--Upload Attachment"),
+    attachmentid = pd.post_attachment(projectid,nodeid,"test.py")
+    if (attachmentid != None): print("PASS")
+    else: print("FAILED")
+
+    print("--Rename Attachment"),
+    if (pd.rename_attachment(projectid,nodeid,attachmentid[0],"FOO.py")[0]=="FOO.py"): print("PASS")
+    else: print("FAILED")
+
+    print("--Download Attachment"),
+    if (pd.get_attachment(projectid,nodeid,"FOO.py") != None): print("PASS")
+    else: print("FAILED")
+
+
     raw_input("\nYou can take this moment to manually inspect Dradis :). Then press enter to continue test...\n")
 
 
     #<Deletions>
     print("\n<<DELETING STUFF>>")
+
+    #raw_input("del_attachment?")
+    print("--Deleting Attachment"),
+    if (pd.delete_attachment(projectid,nodeid,"FOO.py") != None): print("PASS")
+    else: print("FAILED") 
 
     #raw_input("del_note?")
     print("--Deleting Note"),
